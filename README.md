@@ -4,5 +4,7 @@ Recently, I have been reading up on reinforcement learning with Stanford's CS234
 
 ## Cartpole
 I implemented Monte Carlo sampling and Q learning for the cartpole environment in `cartpole.ipynb`.
+
 ![cartpole](cartpole.gif)
+
 The pole is balanced! 🤩
