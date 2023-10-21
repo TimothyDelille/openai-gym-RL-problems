@@ -8,3 +8,6 @@ I implemented Monte Carlo sampling and Q learning for the cartpole environment i
 ![cartpole](cartpole.gif)
 
 The pole is balanced! 🤩
+
+## Car racing
+To play with the car racing game: `python env/lib/python3.9/site-packages/gymnasium/envs/box2d/car_racing.py`
