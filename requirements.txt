@@ -1,0 +1,10 @@
+torch
+torchvision
+gymnasium[box2d]
+opencv-python
+imageio
+matplotlib
+tqdm
+tensorboard
+jupyter
+ipywidgets

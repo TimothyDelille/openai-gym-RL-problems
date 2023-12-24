@@ -29,12 +29,12 @@ def record_history(env, policy, s=0):
     """
     history = []
     done = False
-    env.reset()  # very important
+    env.reset()  # very important. resets the episode.
     while not done:
         a = np.random.choice(range(env.env.nA), p=policy[s])
         s_, r, done, _ = env.step(a)
         history.append((s, a, r))
-        s = s_
+        s = s_  # also very important and easily forgettable.
     return history
 
 
@@ -143,20 +143,6 @@ def sarsa(env, iterations=10000, alpha=0.1, gamma=1, epsilon=0.1):
         Q[s_, a_] = Q[s_, a_] + alpha*(r_ - Q[s_, a_])  # Q is set to zero for terminal states
         policy = epsilon_greedy(env, epsilon, Q)
     return Q, policy
-
-def online_monte_carlo_control(env):
-    pass
-
-# def policy_iteration(env, policy_evaluation):
-#     policy = random_uniform_policy(env)
-#     while True:
-#         Q = policy_evaluation(env, policy)
-#         new_policy = policy_improvement(env, Q)
-#         if np.isclose(policy, new_policy):
-#             break
-#         else:
-#             policy = new_policy
-#     return Q, policy
 
 if __name__ == "__main__":
     env = gym.make('FrozenLake-v1')
