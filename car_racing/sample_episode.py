@@ -12,7 +12,7 @@ from policy_gradient import Policy
 
 @torch.no_grad()
 def sample_episode(ckpt_path):
-    frame_stack_len = 3
+    frame_stack_len = 4
     # model = DQN(frame_stack_len=frame_stack_len)
     model = Policy(frame_stack_len=frame_stack_len)
     model.load_state_dict(torch.load(ckpt_path))
@@ -35,7 +35,7 @@ def sample_episode(ckpt_path):
         # a = model.act(epsilon=0, state=state)
         # action = model.action_space[a]
         # code for policy gradient:
-        mean, cov = model.forward(state)
+        mean, cov, v = model.forward(state)
         eps = np.random.normal(0, 1, size=model.n_actions)
         action = mean + torch.sqrt(cov) * torch.tensor(eps, requires_grad=False)
         action = action.flatten()
@@ -45,6 +45,7 @@ def sample_episode(ckpt_path):
         done = terminated or truncated
         counter += 1
         pbar.update(1)
+    pbar.close()
     env.close()
 
     print("💾 Saving to GIF...")
@@ -57,6 +58,6 @@ if __name__ == "__main__":
     sample_episode(
         ckpt_path=os.path.join(
             os.path.dirname(__file__),
-            "checkpoints/policy_gradient/1500.pt"
+            "checkpoints/policy_gradient/600.pt"
         ),
     )           

@@ -27,9 +27,7 @@ class DQN(nn.Module):
         self.conv2 = nn.Conv2d(6, 12, (4, 4), stride=1)
         self.lin1 = nn.Linear(300, 128)
         self.lin2 = nn.Linear(128, 1)
-        # self.lin_advantage_1 = nn.Linear(300, 128)
-        # self.lin_advantage_2 = nn.Linear(128, self.n_actions)
-
+        
         # image preprocessing steps.
         self.preprocess = T.Compose([
             T.ToTensor(),  # scale to [0, 1] adds batch dim
