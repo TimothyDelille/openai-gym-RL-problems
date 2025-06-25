@@ -1,0 +1,1 @@
+gcloud compute scp vm_requirements.txt "instance-20250624-124035":requirements.txt  --zone "us-central1-c" --project "silken-bastion-463912-s2"

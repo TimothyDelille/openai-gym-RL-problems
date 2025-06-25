@@ -1,7 +1,7 @@
 torch
 torchvision
 # for gymnasium[box2d]
-# also run: brew install swig
+# first run: sudo apt-get install swig build-essential python-dev-is-python3
 wheel
 setuptools 
 gymnasium[box2d]
@@ -10,6 +10,3 @@ imageio
 matplotlib
 tqdm
 tensorboard
-# only for jupyter notebooks:
-jupyter
-ipywidgets

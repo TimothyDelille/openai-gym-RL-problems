@@ -6,12 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as T
 
-# helper function to get output shape of Conv2D layer:
-# https://pytorch.org/docs/stable/generated/torch.nn.Conv2d.html
-def get_conv2d_output_shape(h_in, w_in, padding, dilation, kernel, stride):
-    h_out = math.floor((h_in + 2*padding[0] - dilation[0] * (kernel[0] - 1) - 1)/stride[0] + 1)
-    w_out = math.floor((w_in + 2*padding[1] - dilation[1] * (kernel[1] - 1) - 1)/stride[1] + 1)
-    return (h_out, w_out)
+from utils import get_conv2d_output_shape
 
 class Policy(nn.Module):
     def __init__(self, frame_stack_len=3, learning_rate=1e-3):
@@ -23,7 +18,7 @@ class Policy(nn.Module):
         h_in = w_in = 16
         # image preprocessing steps.
         self.preprocess = T.Compose([
-            T.ToTensor(),  # scale to [0, 1] adds batch dim
+            T.ToTensor(),  # scale to [0, 1] and adds batch dim
             # crop removes the black footer and crops the image to 84x84
             T.Lambda(lambda img: T.functional.crop(img, top=0, left=6, height=84, width=84)),
             T.Grayscale(),
@@ -90,13 +85,4 @@ class Policy(nn.Module):
     #     a = mean + torch.sqrt(cov) * torch.tensor(eps, requires_grad=False) # (1, 3)
     #     return a.flatten()
 
-    def average_gradient_size(self):
-        total_gradient_norm = 0.0
-        num_parameters = 0
-
-        for param in self.parameters():
-            if param.grad is not None:
-                total_gradient_norm += param.grad.data.norm(2).item()  # 2-norm of the gradient
-                num_parameters += 1
-
-        return total_gradient_norm / num_parameters
+    

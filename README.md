@@ -20,3 +20,21 @@ The pole is balanced! 🤩
 
 ## Car racing
 To play with the car racing game: `env/lib/python3.11 env/lib/python3.11/site-packages/gymnasium/envs/box2d/car_racing.py`
+
+# VM
+
+port-forwarding. add this to the gcloud ssh command: `-- -NL 6006:localhost:6006`
+
+
+setup:
+```
+sudo apt install python3.11-venv
+python3 -m venv
+source env/bin/activate
+sudo apt-get install swig build-essential python-dev-is-python3
+python -m pip install -r requirements.txt
+```
+
+set up SSH key on the VM following this: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=linux
+
+install git: `sudo apt-get install git`
