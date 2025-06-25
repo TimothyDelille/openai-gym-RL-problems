@@ -9,6 +9,7 @@ opencv-python
 imageio
 matplotlib
 tqdm
+psutil
 tensorboard
 # only for jupyter notebooks:
 jupyter

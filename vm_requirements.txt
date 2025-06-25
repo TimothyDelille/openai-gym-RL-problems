@@ -10,3 +10,4 @@ imageio
 matplotlib
 tqdm
 tensorboard
+psutil
