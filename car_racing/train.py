@@ -208,7 +208,7 @@ def main():
         metrics.add_scalar("Epsilon", epsilon, episode_counter)
         metrics.add_scalar('Total Reward per episode', total_episode_reward, episode_counter)
         metrics.add_scalar('Episode length', episode_length, episode_counter)
-        metrics.log_system_usage()
+        metrics.log_system_usage(step=episode_counter)
 
         if total_episode_reward > best_total_reward:
             best_total_reward = total_episode_reward
