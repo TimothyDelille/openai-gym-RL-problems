@@ -1,6 +1,7 @@
 import logging
 from collections import deque
 import numpy as np
+import os
 
 import torch
 import gymnasium as gym
@@ -31,6 +32,10 @@ def get_device():
     logger.info(f"Using device: {device}")
     return device
 
+CHECKPOINT_PATH = "./checkpoints"
+if not os.path.exists(CHECKPOINT_PATH):
+    os.mkdir(CHECKPOINT_PATH)
+    
 # state size = 16*16 img *4 frames = 1024 bytes
 # 100 MB buffer size = 100 000 states
 # buffer has to be large enough to break correlations between multiple states
