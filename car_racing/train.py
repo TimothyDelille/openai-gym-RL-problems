@@ -35,7 +35,7 @@ def get_device():
 CHECKPOINT_PATH = "./checkpoints"
 if not os.path.exists(CHECKPOINT_PATH):
     os.mkdir(CHECKPOINT_PATH)
-    
+
 # state size = 16*16 img *4 frames = 1024 bytes
 # 100 MB buffer size = 100 000 states
 # buffer has to be large enough to break correlations between multiple states
@@ -164,7 +164,7 @@ def main():
 
             # construct batch.
             # batch = {"r": [], "done": [], "s": [], "new_s": [], "a": []}
-            sampled_indices = np.random.choice(np.arange(buffer_index if buffer_full else BUFFER_SIZE), replace=False, size=BATCH_SIZE)
+            sampled_indices = np.random.choice(np.arange(buffer_index if not buffer_full else BUFFER_SIZE), replace=False, size=BATCH_SIZE)
             batch = {
                 "done": buffer[sampled_indices][:, -1],
                 "r": buffer[sampled_indices][:, -2],

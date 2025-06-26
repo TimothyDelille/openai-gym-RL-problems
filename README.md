@@ -23,8 +23,11 @@ To play with the car racing game: `env/lib/python3.11 env/lib/python3.11/site-pa
 
 # VM
 
-port-forwarding. add this to the gcloud ssh command: `-- -NL 6006:localhost:6006`
+machine type: e2-standard-8 (4GB memory is not enough to install pytorch)
+disk size: 50GB (10GB is not enough to install all dependencies)
+port-forwarding. add this to the gcloud ssh command: `-- -L 6006:localhost:6006`
 
+nohup tensorboard --logdir=./runs --port=6006 --host=0.0.0.0 > tensorboard.log 2>&1 &
 
 setup:
 ```
@@ -38,3 +41,7 @@ python -m pip install -r requirements.txt
 set up SSH key on the VM following this: https://docs.github.com/en/authentication/connecting-to-github-with-ssh/generating-a-new-ssh-key-and-adding-it-to-the-ssh-agent?platform=linux
 
 install git: `sudo apt-get install git`
+
+
+<!-- tip:
+install torch from pre-built wheel to avoid OOM issues (process killed): `python -m pip install torch torchvision --index-url https://download.pytorch.org/whl/cu118` -->
