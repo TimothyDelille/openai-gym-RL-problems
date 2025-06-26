@@ -163,7 +163,7 @@ def main():
             # batch = {"r": [], "done": [], "s": [], "new_s": [], "a": []}
             sampled_indices = np.random.choice(
                 np.arange(min(buffer_index, BUFFER_SIZE)), 
-                replace=True if BATCH_SIZE <= min(buffer_index, BUFFER_SIZE) else False,
+                replace=False if BATCH_SIZE <= min(buffer_index, BUFFER_SIZE) else True,
                 size=BATCH_SIZE
             )
             batch = {
