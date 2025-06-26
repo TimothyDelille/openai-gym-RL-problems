@@ -34,7 +34,7 @@ def get_device():
 # state size = 16*16 img *4 frames = 1024 bytes
 # 100 MB buffer size = 100 000 states
 # buffer has to be large enough to break correlations between multiple states
-BUFFER_SIZE = int(10000)  # 1e6 in the paper
+BUFFER_SIZE = 100 # int(10000)  # 1e6 in the paper
 
 BATCH_SIZE = 32
 # reward discounting value
@@ -77,8 +77,9 @@ def main():
     # domain_randomize: background and track colours are different on every reset.
     env = gym.make("CarRacing-v3", domain_randomize=False, continuous=True)
     buffer = deque(maxlen=BUFFER_SIZE)  # will automatically pop items when we go over the buffer_size
-    state_size = FRAME_STACK_LEN * 84 * 84
-    buffer = torch.zeros((BUFFER_SIZE, 2 * state_size + 3)).to(device)
+    state_shape = [FRAME_STACK_LEN, 84, 84]
+    state_size = np.prod(state_shape)
+    buffer = torch.zeros((BUFFER_SIZE, 2 * state_size + 3), device="cpu")
     buffer_index = 0
     buffer_full = False
 
@@ -106,9 +107,9 @@ def main():
         while not done:
             episode_length += 1
             state = torch.concatenate(list(frame_stack), dim=0)
-            state = state.unsqueeze(0).to(device)  # add batch dim
+            state = state.unsqueeze(0)  # add batch dim
             epsilon = get_epsilon(epsilon_start=EPSILON_START, epsilon_end=EPSILON_END, frame=updates_counter)
-            a = model.act(epsilon, state)  # action index. we will store it in the buffer.
+            a = model.act(epsilon, state.to(device))  # action index. we will store it in the buffer.
             a_arr = model.action_space[a]  # tuple (steering, gas, break)
             reward = 0
             # atari paper: we fixed all positive rewards to be 1 and all negative rewards to be −1,
@@ -136,16 +137,16 @@ def main():
             total_episode_reward += reward
             
             new_state = torch.concatenate(list(frame_stack), dim=0)
-            # buffer.append((state, a, scaled_reward, new_state, done)) 
+            # buffer.append((state, a, scaled_reward, new_state, done))
             buffer[(buffer_index + 1) % BUFFER_SIZE] = torch.cat(
                 [
-                    state.reshape(1, -1),
-                    new_state.reshape(1, -1),
+                    state.reshape(-1),
+                    new_state.reshape(-1),
                     torch.tensor([a]),
                     torch.tensor([scaled_reward]),
-                    torch.tensor([1.0] if done else [0.0]),   
+                    torch.tensor([1.0] if done else [0.0]),
                 ]
-            ).to(device)
+            , axis=0)
             if buffer_index == BUFFER_SIZE - 1:
                 buffer_full = True
             buffer_index = (buffer_index + 1) % BUFFER_SIZE
@@ -159,13 +160,12 @@ def main():
             # construct batch.
             # batch = {"r": [], "done": [], "s": [], "new_s": [], "a": []}
             sampled_indices = np.random.choice(np.arange(buffer_index if buffer_full else BUFFER_SIZE), replace=False, size=BATCH_SIZE)
-            
             batch = {
-                "done": buffer[sampled_indices][-1],
-                "r": buffer[sampled_indices][-2],
-                "a": buffer[sampled_indices][-3].astype(torch.int),
-                "s": buffer[sampled_indices][0:state_size],
-                "new_s": buffer[sampled_indices][state_size:2*state_size],
+                "done": buffer[sampled_indices][:, -1],
+                "r": buffer[sampled_indices][:, -2],
+                "a": buffer[sampled_indices][:, -3].type(torch.int),
+                "s": buffer[sampled_indices][:, 0:state_size].reshape([-1] + state_shape),
+                "new_s": buffer[sampled_indices][:, state_size:2*state_size].reshape([-1] + state_shape),
             }
             # for index in sampled_indices:
             #     sj, aj, rj, new_sj, donej = buffer[index]
@@ -183,11 +183,11 @@ def main():
 
             with torch.no_grad():
                 # target_model for double q learning
-                q = model.forward(batch["new_s"]).max(dim=-1).values
-                batch["y"] = batch["r"] + (1 - batch["done"]) * GAMMA * q
+                q = model.forward(batch["new_s"].to(device)).max(dim=-1).values
+                batch["y"] = batch["r"].to(device) + (1 - batch["done"].to(device)) * GAMMA * q
                 batch["y"] = batch["y"].float()
 
-            loss = model.compute_loss(s=batch["s"], y=batch["y"], a=batch["a"])
+            loss = model.compute_loss(s=batch["s"].to(device), y=batch["y"], a=batch["a"])
             total_loss += loss.item()
             loss.backward()
             model.optimizer.step()
@@ -217,3 +217,5 @@ def main():
     metrics.close()
     env.close()
 
+if __name__ == "__main__":
+    main()
