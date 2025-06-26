@@ -152,8 +152,10 @@ def main():
                     torch.tensor([1.0] if done else [0.0]),
                 ]
             , axis=0)
+            print(buffer_index, BUFFER_SIZE, buffer_full)
             if buffer_index + 1 == BUFFER_SIZE - 1:
                 buffer_full = True
+            print(buffer_index, BUFFER_SIZE, buffer_full)
             buffer_index = (buffer_index + 1) % BUFFER_SIZE
             # no need to wait for full buffer to start training. 
 
