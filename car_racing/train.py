@@ -86,7 +86,6 @@ def main():
     state_size = np.prod(state_shape)
     buffer = torch.zeros((BUFFER_SIZE, 2 * state_size + 3), device="cpu")
     buffer_index = 0
-    buffer_full = False
 
     n_updates = int(10e6)  # 10M frames in the paper
     pbar = tqdm(total=n_updates)
@@ -143,7 +142,7 @@ def main():
             
             new_state = torch.concatenate(list(frame_stack), dim=0)
             # buffer.append((state, a, scaled_reward, new_state, done))
-            buffer[(buffer_index + 1) % BUFFER_SIZE] = torch.cat(
+            buffer[buffer_index % BUFFER_SIZE] = torch.cat(
                 [
                     state.reshape(-1),
                     new_state.reshape(-1),
@@ -152,9 +151,7 @@ def main():
                     torch.tensor([1.0] if done else [0.0]),
                 ]
             , axis=0)
-            if buffer_index + 1 == BUFFER_SIZE - 1:
-                buffer_full = True
-            buffer_index = (buffer_index + 1) % BUFFER_SIZE
+            buffer_index += 1
             # no need to wait for full buffer to start training. 
 
             # early termination of negative episodes. 
@@ -164,7 +161,11 @@ def main():
 
             # construct batch.
             # batch = {"r": [], "done": [], "s": [], "new_s": [], "a": []}
-            sampled_indices = np.random.choice(np.arange(buffer_index if not buffer_full else BUFFER_SIZE), replace=False, size=min(BATCH_SIZE, buffer_index))
+            sampled_indices = np.random.choice(
+                np.arange(min(buffer_index, BUFFER_SIZE)), 
+                replace=True if BATCH_SIZE <= min(buffer_index, BUFFER_SIZE) else False,
+                size=BATCH_SIZE
+            )
             batch = {
                 "done": buffer[sampled_indices][:, -1],
                 "r": buffer[sampled_indices][:, -2],
