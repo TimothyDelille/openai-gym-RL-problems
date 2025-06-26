@@ -152,10 +152,8 @@ def main():
                     torch.tensor([1.0] if done else [0.0]),
                 ]
             , axis=0)
-            print(buffer_index, BUFFER_SIZE, buffer_full)
             if buffer_index + 1 == BUFFER_SIZE - 1:
                 buffer_full = True
-            print(buffer_index, BUFFER_SIZE, buffer_full)
             buffer_index = (buffer_index + 1) % BUFFER_SIZE
             # no need to wait for full buffer to start training. 
 
@@ -166,7 +164,7 @@ def main():
 
             # construct batch.
             # batch = {"r": [], "done": [], "s": [], "new_s": [], "a": []}
-            sampled_indices = np.random.choice(np.arange(buffer_index if not buffer_full else BUFFER_SIZE), replace=False, size=BATCH_SIZE)
+            sampled_indices = np.random.choice(np.arange(buffer_index if not buffer_full else BUFFER_SIZE), replace=False, size=min(BATCH_SIZE, buffer_index))
             batch = {
                 "done": buffer[sampled_indices][:, -1],
                 "r": buffer[sampled_indices][:, -2],
